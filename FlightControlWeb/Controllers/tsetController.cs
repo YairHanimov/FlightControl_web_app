@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FlightControlWeb.Controllers.models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +12,12 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class tsetController : ControllerBase
     {
+        private iflightmanager flymanager = new flightmanager();
         // GET: api/tset
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<Flight> Getflight()
         {
-            return new string[] { "value1", "value2" };
+           return flymanager.GetallFlights();
         }
 
         // GET: api/tset/5

@@ -5,17 +5,17 @@ using System.Threading.Tasks;
 using FlightControlWeb.Controllers.models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
 namespace FlightControlWeb.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class tsetController : ControllerBase
     {
-        private iflightmanager flymanager = new flightmanager();
+
+        private flightplanmanager flymanager = new flightplanmanager();
         // GET: api/tset
         [HttpGet]
-        public IEnumerable<Flight> Getflight()
+        public IEnumerable<Flightplan> Getflight()
         {
            return flymanager.GetallFlights();
         }
@@ -29,8 +29,12 @@ namespace FlightControlWeb.Controllers
 
         // POST: api/tset
         [HttpPost]
-        public void Post([FromBody] string value)
+        public Flightplan Post(Flightplan f)
         {
+
+            flymanager.addflight(f);
+            return f;
+            
         }
 
         // PUT: api/tset/5

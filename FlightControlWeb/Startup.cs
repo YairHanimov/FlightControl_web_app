@@ -36,7 +36,7 @@ namespace FlightControlWeb
             }
 
             app.UseRouting();
-
+            app.UseStaticFiles();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

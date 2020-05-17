@@ -1,14 +1,62 @@
-﻿<!DOCTYPE html>
-<html>
+﻿<html>
 <body>
 
-    <h1>The input accept attribute</h1>
+    <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
 
-    <form id="uploadbanner" enctype="application/x-www-form-urlencoded" method="post" action="/api/tset">
-   <input id="fileupload" name="myfile" type="file" />
-   <input type="submit" value="submit" id="submit" />
-</form>
+        <fieldset>
+            <h2>Json File</h2>
+            <input type='file' id='fileinput'>
+            <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+        </fieldset>
+    </form>
 
+
+    <script type="text/javascript">
+
+        function loadFile() {
+            var input, file, fr;
+
+            if (typeof window.FileReader !== 'function') {
+                alert("The file API isn't supported on this browser yet.");
+                return;
+            }
+
+            input = document.getElementById('fileinput');
+            if (!input) {
+                alert("Um, couldn't find the fileinput element.");
+            }
+            else if (!input.files) {
+                alert("This browser doesn't seem to support the `files` property of file inputs.");
+            }
+            else if (!input.files[0]) {
+                alert("Please select a file before clicking 'Load'");
+            }
+            else {
+
+                file = input.files[0];
+                fr = new FileReader();
+                fr.onload = receivedText;
+                fr.readAsText(file);
+               
+            }
+
+            function receivedText(e) {
+                let lines = e.target.result;
+                
+                console.log(lines);
+                var newArr = JSON.parse(lines);
+                var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+                var theUrl = "http://localhost:62243/api/tset";
+                xmlhttp.open("POST", theUrl);
+                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                console.log(JSON.stringify( newArr));
+
+                xmlhttp.send(JSON.stringify( newArr ));
+
+         
+            }
+        }
+    </script>
 
 </body>
 </html>

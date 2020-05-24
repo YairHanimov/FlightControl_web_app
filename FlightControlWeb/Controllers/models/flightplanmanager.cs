@@ -22,8 +22,8 @@ namespace FlightControlWeb.Controllers.models
         new segments {latitude=52,longitude=54,timespan_seconds=50}
         };
         private static List<InitialLocation> InitialLocation = new List<InitialLocation>() {
-        new InitialLocation {latitude=22,longitude=24,DateTime=DateTime.Now},
-        new InitialLocation {latitude=52,longitude=54,DateTime=DateTime.Now}
+        new InitialLocation {latitude=22,longitude=24,date_time=DateTime.Now},
+        new InitialLocation {latitude=52,longitude=54,date_time=DateTime.Now}
         };
         private static List<Flightplan> flights = new List<Flightplan>()
 

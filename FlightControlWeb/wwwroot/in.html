@@ -43,7 +43,6 @@
             function receivedText(e) {
                 let lines = e.target.result;
                 
-                console.log(lines);
                 var newArr = JSON.parse(lines);
                 var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
                 var theUrl = "http://localhost:62243/api/tset";

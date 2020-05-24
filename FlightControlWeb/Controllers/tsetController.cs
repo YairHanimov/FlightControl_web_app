@@ -12,7 +12,12 @@ namespace FlightControlWeb.Controllers
     public class tsetController : ControllerBase
     {
 
+        Random rand = new Random();
+
+        public const string Alphabet =
+        "abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         private flightplanmanager flymanager = new flightplanmanager();
+        private flightmanager fmanage = new flightmanager();
         // GET: api/tset
         [HttpGet]
         public IEnumerable<Flightplan> Getflight()
@@ -31,8 +36,13 @@ namespace FlightControlWeb.Controllers
         [HttpPost]
         public Flightplan Post(Flightplan f)
         {
+            string dammyf = GenerateString(10);
+            f.FlightPlanId = dammyf;
 
             flymanager.addflight(f);
+            
+            
+
             return f;
             
         }
@@ -47,6 +57,15 @@ namespace FlightControlWeb.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+        public string GenerateString(int size)
+        {
+            char[] chars = new char[size];
+            for (int i = 0; i < size; i++)
+            {
+                chars[i] = Alphabet[rand.Next(Alphabet.Length)];
+            }
+            return new string(chars);
         }
     }
 }

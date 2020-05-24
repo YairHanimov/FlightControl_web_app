@@ -14,6 +14,8 @@ namespace FlightControlWeb.Controllers.models
         public  InitialLocation initial_location { get; set; }
 
         public List<segments> segments { get; set; }
+        public string FlightPlanId { get; set; }
+
 
     }
 

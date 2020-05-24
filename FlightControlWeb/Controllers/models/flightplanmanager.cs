@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace FlightControlWeb.Controllers.models
 
         {
             new Flightplan  {   initial_location=InitialLocation.First(), passenger =2,
-              company_name="bla bla",segments=listasegments},
+              company_name="bla bla",segments=listasegments, FlightPlanId="aaac12"},
          
         };
 
@@ -39,9 +40,18 @@ namespace FlightControlWeb.Controllers.models
             
         }
 
-        public void deleteflight(int id)
+        public void deleteflight(string id)
         {
-           
+            Flightplan p = flights.Where(x => x.FlightPlanId == id).FirstOrDefault();
+            if (p == null)
+            {
+                throw new Exception("id not found ");
+            }
+            else
+            {
+                flights.Remove(p);
+            }
+
         }
 
         public IEnumerable<Flightplan> GetallFlights()
@@ -49,7 +59,18 @@ namespace FlightControlWeb.Controllers.models
             return flights;
         }
 
-       
+       public Flightplan getbyid(String id)
+        {
+            Flightplan p = flights.Where(x => x.FlightPlanId == id).FirstOrDefault();
+            if (p == null)
+            {
+                throw new Exception("id not found ");
+            }
+            else
+            {
+                return p;
+            }
+        }
 
         public void updateflight(Flight n)
         {

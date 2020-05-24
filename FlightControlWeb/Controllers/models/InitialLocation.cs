@@ -11,6 +11,6 @@ namespace FlightControlWeb.Controllers.models
 
         public double latitude { get; set; }
 
-        public DateTimeOffset DateTime { get; set; }
+        public DateTime DateTime { get; set; }
     }
 }

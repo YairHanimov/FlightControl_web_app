@@ -16,7 +16,7 @@ namespace FlightControlWeb.Controllers
 
         public const string Alphabet =
         "abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        private flightplanmanager flymanager = new flightplanmanager();
+        public static flightplanmanager flymanager = new flightplanmanager();
         private flightmanager fmanage = new flightmanager();
         // GET: api/tset
         [HttpGet]

@@ -25,7 +25,7 @@ namespace FlightControlWeb.Controllers.models
         new InitialLocation {latitude=22,longitude=24,date_time=DateTime.Now},
         new InitialLocation {latitude=52,longitude=54,date_time=DateTime.Now}
         };
-        private static List<Flightplan> flights = new List<Flightplan>()
+        public static List<Flightplan> flights = new List<Flightplan>()
 
         {
             new Flightplan  {   initial_location=InitialLocation.First(), passenger =2,

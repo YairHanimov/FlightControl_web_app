@@ -12,13 +12,29 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightsController : ControllerBase
     {
-        private flightmanager fly = new flightmanager();
+        
 
-
+        
         [HttpGet]
         public void GetFlights([FromQuery(Name = "relative_to")]string relativeTime)
         {
-            Console.WriteLine(relativeTime);
+           // DateTime mytime = DateTime.Parse(relativeTime);
+            foreach (var mydata in flightplanmanager.flights)
+            {
+                DateTime damytime = mydata.initial_location.date_time;
+                int size = mydata.segments.Count;
+                for (int i=0; i< size; i++)
+                {
+                    damytime= damytime.AddSeconds(mydata.segments[i].timespan_seconds);
+                   
+                }
+                mydata.endtime = damytime;
+
+
+                
+            }
+
+
         }
 
         // POST: api/Flights

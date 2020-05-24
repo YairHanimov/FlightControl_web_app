@@ -16,6 +16,8 @@ namespace FlightControlWeb.Controllers.models
         public List<segments> segments { get; set; }
         public string FlightPlanId { get; set; }
 
+        public DateTime endtime { get; set; }
+
 
     }
 

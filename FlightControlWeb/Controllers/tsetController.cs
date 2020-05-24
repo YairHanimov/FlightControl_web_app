@@ -27,9 +27,9 @@ namespace FlightControlWeb.Controllers
 
         // GET: api/tset/5
         [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        public Flightplan Get(string id)
         {
-            return "value";
+          return  flymanager.getbyid(id);
         }
 
         // POST: api/tset
@@ -55,8 +55,9 @@ namespace FlightControlWeb.Controllers
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(string id)
         {
+            flymanager.deleteflight(id);
         }
         public string GenerateString(int size)
         {

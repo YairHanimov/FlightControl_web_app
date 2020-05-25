@@ -35,7 +35,8 @@ namespace FlightControlWeb.Controllers
                 {
                     damytime= damytime.AddSeconds(mydata.segments[i].timespan_seconds);
                     DateTime d2 = damytime;
-                    DateTime targetDt = DateTime.Parse(relativeTime);
+                    //DateTime targetDt = DateTime.Parse(relativeTime);
+                     DateTime targetDt = DateTime.Parse(relativeTime);
                     if (targetDt.Ticks > firstcompare.Ticks && targetDt.Ticks < d2.Ticks)
                     {
                         Flight dammy = new Flight();

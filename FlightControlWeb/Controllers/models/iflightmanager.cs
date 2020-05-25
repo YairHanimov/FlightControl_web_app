@@ -8,10 +8,10 @@ namespace FlightControlWeb.Controllers.models
     interface iflightmanager
     {
         IEnumerable<Flight> GetallFlights();
-        Flight getflyightbyid(int id);
+        Flight getflyightbyid(string id);
         void addflight(Flight f);
         void updateflight(Flight f);
-        void deleteflight(int id);
+        void deleteflight(string id);
             
     }
 }

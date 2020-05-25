@@ -14,12 +14,13 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class FlightsController : ControllerBase
     {
-        
 
-        
+
+
         [HttpGet]
-        public void GetFlights([FromQuery(Name = "relative_to")]string relativeTime)
+        public IEnumerable<Flight> GetFlights([FromQuery(Name = "relative_to")]string relativeTime)
         {
+                 List<Flight> listtosend = new List<Flight>();
 
            // DateTime mytime = DateTime.Parse(relativeTime);
             foreach (var mydata in flightplanmanager.flights)
@@ -28,21 +29,42 @@ namespace FlightControlWeb.Controllers
                 DateTime d1 = mydata.initial_location.date_time;
 
                 int size = mydata.segments.Count;
+                DateTime firstcompare = mydata.initial_location.date_time;
+                InitialLocation firstloack = mydata.initial_location;
                 for (int i=0; i< size; i++)
                 {
                     damytime= damytime.AddSeconds(mydata.segments[i].timespan_seconds);
-                   
-                }
-                mydata.endtime = damytime;
-               DateTime  d2 = damytime;
-                DateTime targetDt = DateTime.Parse(relativeTime);
-                if (targetDt.Ticks >= d1.Ticks && targetDt.Ticks <= d2.Ticks)
-                {
-                   // addtolist 
+                    DateTime d2 = damytime;
+                    DateTime targetDt = DateTime.Parse(relativeTime);
+                    if (targetDt.Ticks > firstcompare.Ticks && targetDt.Ticks < d2.Ticks)
+                    {
+                        Flight dammy = new Flight();
+                        dammy.flight_id = mydata.FlightPlanId;
+                        dammy.company_name = mydata.company_name;
+                        dammy.passengers = mydata.passenger;
+                        TimeSpan timespan = targetDt - firstcompare;
+                        TimeSpan allwaysegment = d2 - firstcompare;
+                        double transitiontime = timespan.TotalSeconds;
+                        double allway = allwaysegment.TotalSeconds;
+                        double calulate = transitiontime / allway;
+                        double newlat =firstloack.latitude+( (mydata.segments[i].latitude - firstloack.latitude) * calulate);
+                        double newlong = firstloack.longitude + ((mydata.segments[i].longitude - firstloack.longitude) * calulate);
+                        dammy.longitude = newlong;
+                        dammy.latitude = newlat;
+                        listtosend.Add(dammy);
+                    }
+
+                    mydata.endtime = damytime;
+                    firstcompare = damytime;
+
+                    // addtolist 
+                    firstloack.latitude = mydata.segments[i].latitude;
+                    firstloack.latitude = mydata.segments[i].longitude;
+
                 }
 
             }
-
+            return listtosend;
 
         }
 

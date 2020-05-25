@@ -9,9 +9,9 @@ namespace FlightControlWeb.Controllers.models
     {
         private static List<Flight> flights = new List<Flight>()
         {
-            new Flight  { flight_id =3, longitude =33, latitude =32, passengers =2,
+            new Flight  { flight_id ="3", longitude =33, latitude =32, passengers =2,
               company_name="bla bla",date_time=DateTime.Now,is_external=true},
-             new Flight  { flight_id =80, longitude =33, latitude =32, passengers =2,
+             new Flight  { flight_id ="80", longitude =33, latitude =32, passengers =2,
               company_name="bla bla",date_time=DateTime.Now,is_external=true}
         };
         
@@ -22,7 +22,7 @@ namespace FlightControlWeb.Controllers.models
             flights.Add(f);
         }
 
-        public void deleteflight(int  id)
+        public void deleteflight(string  id)
         {
             Flight f = flights.Where(f => f.flight_id == id).FirstOrDefault();
            
@@ -34,7 +34,7 @@ namespace FlightControlWeb.Controllers.models
             return flights;
         }
 
-        public Flight getflyightbyid(int id)
+        public Flight getflyightbyid(string id)
         {
             Flight f = flights.Where(f => f.flight_id == id).FirstOrDefault();
             return f;

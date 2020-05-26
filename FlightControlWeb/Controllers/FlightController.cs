@@ -85,8 +85,17 @@ namespace FlightControlWeb.Controllers
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(string id)
         {
+            Flightplan p = flightplanmanager.flights.Where(x => x.FlightPlanId == id).FirstOrDefault();
+            if (p == null)
+            {
+                throw new Exception("id not found ");
+            }
+            else
+            {
+                flightplanmanager.flights.Remove(p);
+            }
         }
     }
 }

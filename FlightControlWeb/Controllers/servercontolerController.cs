@@ -21,7 +21,7 @@ namespace FlightControlWeb.Controllers
         }
 
         // GET: api/servercontoler/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public server Get(string id)
         {
           return  managaerserver.getbyid(id);

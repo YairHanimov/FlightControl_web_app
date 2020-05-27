@@ -7,6 +7,7 @@ using FlightControlWeb.Controllers.models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 
 namespace FlightControlWeb.Controllers
 {
@@ -18,7 +19,7 @@ namespace FlightControlWeb.Controllers
 
 
         [HttpGet]
-        public IEnumerable<Flight> GetFlights([FromQuery(Name = "relative_to")]string relativeTime)
+        public async Task<IEnumerable<Flight>> GetFlightsAsync([FromQuery(Name = "relative_to")]string relativeTime)
         {
                  List<Flight> listtosend = new List<Flight>();
 
@@ -67,6 +68,13 @@ namespace FlightControlWeb.Controllers
                 }
 
             }
+            if (Request.Query.ContainsKey("sync_all"))
+            {
+                foreach (var serverdata in iservermanager.allserverslist)
+                {
+                    listtosend.AddRange(await askrequset(serverdata, relativeTime));
+                }
+            }
             return listtosend;
 
         }
@@ -96,6 +104,15 @@ namespace FlightControlWeb.Controllers
             {
                 flightplanmanager.flights.Remove(p);
             }
+        }
+        public async Task<List<Flight>> askrequset(server servers, string relativeTime)
+        {
+            Httpclientclass http = new Httpclientclass();
+            string url = "/api/flights?relative_to=" + relativeTime;
+            var response = await http.makeRequest(servers.ServerURL + url);
+            List<Flight> theflightsList = new List<Flight>();
+            theflightsList = JsonConvert.DeserializeObject<List<Flight>>(response);
+            return theflightsList;
         }
     }
 }

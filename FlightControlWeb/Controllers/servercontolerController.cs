@@ -29,9 +29,18 @@ namespace FlightControlWeb.Controllers
 
         // POST: api/servercontoler
         [HttpPost]
-        public void Post([FromBody] string value)
+        public server Post(server f)
         {
-        }
+
+
+            iservermanager.allserverslist.Add(f);
+
+
+
+            return f;
+
+        
+    }
 
         // PUT: api/servercontoler/5
         [HttpPut("{id}")]

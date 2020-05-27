@@ -9,7 +9,7 @@ namespace FlightControlWeb.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class tsetController : ControllerBase
+    public class FlightPlanController : ControllerBase
     {
 
         Random rand = new Random();
@@ -18,21 +18,21 @@ namespace FlightControlWeb.Controllers
         "abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         public static flightplanmanager flymanager = new flightplanmanager();
         private flightmanager fmanage = new flightmanager();
-        // GET: api/tset
+        // GET: api/Flight
         [HttpGet]
         public IEnumerable<Flightplan> Getflight()
         {
            return flymanager.GetallFlights();
         }
 
-        // GET: api/tset/5
+        // GET: api/Flight/5
         [HttpGet("{id}", Name = "Get")]
         public Flightplan Get(string id)
         {
           return  flymanager.getbyid(id);
         }
 
-        // POST: api/tset
+        // POST: api/Flight
         [HttpPost]
         public Flightplan Post(Flightplan f)
         {
@@ -45,10 +45,10 @@ namespace FlightControlWeb.Controllers
 
             return f;
 
-        } 
+        }
 
 
-        // PUT: api/tset/5
+        // PUT: api/Flight/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
         {

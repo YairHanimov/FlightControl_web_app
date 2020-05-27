@@ -54,7 +54,7 @@ namespace FlightControlWeb.Controllers
                         double newlong = firstloack.longitude + ((mydata.segments[i].longitude - firstloack.longitude) * calulate);
                         dammy.longitude = newlong;
                         dammy.latitude = newlat;
-                        dammy.date_time = DateTime.Now;
+                        dammy.date_time = targetDt;
                         listtosend.Add(dammy);
                     }
 

@@ -45,7 +45,7 @@
                 
                 var newArr = JSON.parse(lines);
                 var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-                var theUrl = "http://localhost:62243/api/tset";
+                var theUrl = "http://localhost:62243/api/Flightplan";
                 xmlhttp.open("POST", theUrl);
                 xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
                 console.log(JSON.stringify( newArr));

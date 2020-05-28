@@ -7,7 +7,7 @@ namespace FlightControlWeb.Controllers.models
 {
     public class InitialLocation
     {
-        public long longitude { get; set; }
+        public double longitude { get; set; }
 
         public double latitude { get; set; }
 

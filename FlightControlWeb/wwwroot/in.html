@@ -1,61 +1,282 @@
-﻿<html>
-<body>
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 
-    <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
+    <style type="text/css">
+        #map {
+            width: 550px;
+            height: 450px;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
 
-        <fieldset>
-            <h2>Json File</h2>
-            <input type='file' id='fileinput'>
-            <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
-        </fieldset>
-    </form>
+        .one {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            grid-auto-rows: minmax(110px, auto);
+        }
+
+        .two {
+            grid-column: 4;
+            grid-row: 1;
+        }
+
+        .three {
+            width: 350px;
+            grid-column: 2;
+            grid-row: 5;
+        }
+
+        .four {
+            grid-column: 3;
+            grid-row: 1;
+        }
+    </style>
+    <script>
+        let flightArr = new Array();
 
 
-    <script type="text/javascript">
+        function Remove(button) {
 
-        function loadFile() {
-            var input, file, fr;
-
-            if (typeof window.FileReader !== 'function') {
-                alert("The file API isn't supported on this browser yet.");
-                return;
+            var url = "http://localhost:62243/api/Flights/";
+            var xhr = new XMLHttpRequest()
+            var dammy = flightArr[button.parentNode.parentNode.rowIndex - 1].flight_id;
+            xhr.open("DELETE", url + dammy, true);
+            xhr.onload = function () {
+                var users = JSON.parse(xhr.responseText);
+                if (xhr.readyState == 4 && xhr.status == "200") {
+                    console.table(users);
+                } else {
+                    console.error(users);
+                }
             }
+            flightArr.splice(button.parentNode.parentNode.rowIndex - 1, 1);
+            xhr.send(null);
 
-            input = document.getElementById('fileinput');
-            if (!input) {
-                alert("Um, couldn't find the fileinput element.");
-            }
-            else if (!input.files) {
-                alert("This browser doesn't seem to support the `files` property of file inputs.");
-            }
-            else if (!input.files[0]) {
-                alert("Please select a file before clicking 'Load'");
-            }
-            else {
+            document.getElementById("tblCustomers").deleteRow(button.parentNode.parentNode.rowIndex);
+        };
+        function AddRow(flight) {
+            var tBody = document.getElementById("tblCustomers").getElementsByTagName("TBODY")[0];
 
-                file = input.files[0];
-                fr = new FileReader();
-                fr.onload = receivedText;
-                fr.readAsText(file);
-               
-            }
+            //Add Row.
+            row = tBody.insertRow(-1);
 
-            function receivedText(e) {
-                let lines = e.target.result;
-                
-                var newArr = JSON.parse(lines);
-                var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
-                var theUrl = "http://localhost:62243/api/Flightplan";
-                xmlhttp.open("POST", theUrl);
-                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                console.log(JSON.stringify( newArr));
+            //Add Name cell.
+            var cell = row.insertCell(-1);
+            cell.innerHTML = flight.flight_id;
+            row.onclick = function () { showFlight(this, flight) };
 
-                xmlhttp.send(JSON.stringify( newArr ));
+            //Add Country cell.
+            cell = row.insertCell(-1);
+            cell.innerHTML = flight.company_name;
 
-         
+            //Add Button cell.
+            cell = row.insertCell(-1);
+            var btnRemove = document.createElement("INPUT");
+            btnRemove.type = "button";
+            btnRemove.value = "X";
+            btnRemove.setAttribute("onclick", "Remove(this);");
+            cell.appendChild(btnRemove);
+
+
+
+
+        }
+
+        function showFlight(row, flight) {
+            if (row.style.color == "blue") {
+                row.style.color = "black";
+                document.getElementById("three").innerHTML = "";
+
+            } else {
+                var url = "http://localhost:62243/api/Flightplan/";
+                var xhr = new XMLHttpRequest()
+                var dammy = flight.flight_id;
+                xhr.open("GET", url + dammy, true);
+                xhr.onload = function () {
+                    var users = JSON.parse(xhr.responseText);
+                    if (xhr.readyState == 4 && xhr.status == "200") {
+                        var obj = JSON.parse(this.responseText);
+                        document.getElementById("three").innerHTML = "passengers: " + obj.passenger +
+                            " company name: " + obj.company_name;
+
+                        showLine(obj.initial_location, obj.segments[0]);
+                        for (var i = 1; i < obj.segments.length; i++) {
+                            showLine(obj.segments[i - 1], obj.segments[i]);
+                        }
+
+                    } else {
+                        console.error(users);
+                    }
+                }
+                xhr.send(null);
+                for (let i = 1; i <= flightArr.length; i++) {
+                    document.getElementById("tblCustomers").rows[i].style.color = "black";
+                }
+                row.style.color = "blue";
             }
         }
+        function showLine(startPoint, endPoint) {
+            let line = L.polyline(
+                [[startPoint.latitude, startPoint.longitude], [endPoint.latitude, endPoint.longitude]],
+                { color: "white", weight: 5, id: 'cxc' }
+            ).addTo(markerGroup);
+            var x_id = L.stamp(line);
+            //document.write(x_id);
+        }
+        function deleteLine(i) {
+            markerGroup.removeLayer(46);
+        }
     </script>
+</head>
+<body>
 
+    <script>
+        setInterval(function () {
+
+            loadDoc();
+        }, 1000);
+    </script>
+    <div class="one">
+
+        <div class="two">
+            <table id="tblCustomers" cellpadding="0" cellspacing="0" border="1">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>company</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+
+            </table>
+
+        </div>
+        <div class="three" id="three">
+
+        </div>
+        <div class="four">
+            <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
+
+                <fieldset>
+                    <h2>Json File</h2>
+                    <input type='file' id='fileinput'>
+                    <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
+                </fieldset>
+            </form>
+
+            <script type="text/javascript">
+
+                function loadFile() {
+                    var input, file, fr;
+
+                    if (typeof window.FileReader !== 'function') {
+                        alert("The file API isn't supported on this browser yet.");
+                        return;
+                    }
+
+                    input = document.getElementById('fileinput');
+                    if (!input) {
+                        alert("Um, couldn't find the fileinput element.");
+                    }
+                    else if (!input.files) {
+                        alert("This browser doesn't seem to support the `files` property of file inputs.");
+                    }
+                    else if (!input.files[0]) {
+                        alert("Please select a file before clicking 'Load'");
+                    }
+                    else {
+
+                        file = input.files[0];
+                        fr = new FileReader();
+                        fr.onload = receivedText;
+                        fr.readAsText(file);
+
+                    }
+
+
+                    function receivedText(e) {
+                        let lines = e.target.result;
+                        var newArr = JSON.parse(lines);
+                        var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+                        var theUrl = "http://localhost:62243/api/flightplan";
+                        xmlhttp.open("POST", theUrl);
+                        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                        console.log(JSON.stringify(newArr));
+                        xmlhttp.send(JSON.stringify(newArr));
+
+
+                    }
+
+                }
+                function loadDoc() {
+                    var token;
+                    var xhttp = new XMLHttpRequest();
+                    var now = new Date();
+                    var isoDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+                    xhttp.open("GET", "/api/Flights?relative_to=" + isoDate, true);
+                    xhttp.send();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4 && this.status == 200) {
+                            token = this.responseText.replace("[", "").replace("]", "");
+                            token = token.split("},");
+                            for (var i = 0; token[i] != null; i++) {
+                                if (token[i].slice(-1) != "}") {
+                                    token[i] = token[i].concat("}");
+                                }
+                                var obj = JSON.parse(token[i]);
+                                if (flightArr.some(e => e.flight_id === obj.flight_id)) {
+                                    var index = flightArr.map(function (e) { return e.flight_id; }).indexOf(obj.flight_id);
+                                    flightArr[index] = obj;
+                                    let png = L.marker([flightArr[index].latitude, flightArr[index].longitude]).addTo(map);
+                                    png.on('click', function () {
+                                        showFlight(row, flightArr[index]);
+                                    });
+                                    //setTimeout(5000);
+                                    //map.removeLayer(png);
+                                    //document.getElementById("three").innerHTML = obj.longitude;
+                                } else {
+                                    flightArr.push(obj);
+                                    AddRow(obj);
+
+                                }
+
+
+                            }
+
+                        }
+                    };
+
+                    //gogo();
+                }
+            </script>
+
+        </div>
+        <div id="map">
+            <script>
+                let map = L.map("map", { center: [31.3, 35], zoom: 5 });
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution: '&copy; <a href="http://' +
+                            'www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }
+                ).addTo(map);
+                var markerGroup = L.layerGroup().addTo(map);
+
+
+
+            </script>
+        </div>
+
+    </div>
 </body>
 </html>

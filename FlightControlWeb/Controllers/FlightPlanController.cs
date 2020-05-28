@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using FlightControlWeb.Controllers.models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+
 namespace FlightControlWeb.Controllers
 {
     [Route("api/[controller]")]
@@ -27,8 +29,21 @@ namespace FlightControlWeb.Controllers
 
         // GET: api/Flight/5
         [HttpGet("{id}", Name = "Get")]
-        public Flightplan Get(string id)
+        public async Task<Flightplan> GetAsync(string id)
         {
+            if (flymanager.getbyid(id)==null)
+            {
+                foreach (var serverdata in iservermanager.allserverslist)
+                {
+                    Flightplan flightPlan = new Flightplan();
+                    string param = "/api/FlightPlan/";
+                    flightPlan = await askserver(serverdata, param + id);
+
+                    return flightPlan;
+                }
+                return null; 
+            }
+            else
           return  flymanager.getbyid(id);
         }
 
@@ -68,6 +83,16 @@ namespace FlightControlWeb.Controllers
                 chars[i] = Alphabet[rand.Next(Alphabet.Length)];
             }
             return new string(chars);
+        }
+        public async Task<Flightplan> askserver(server servers, string s)
+        {
+
+            Httpclientclass httpRequestClass = new Httpclientclass();
+            var result = await httpRequestClass.makeRequest(servers.ServerURL + s);
+
+            Flightplan fl = new Flightplan();
+            fl = JsonConvert.DeserializeObject<Flightplan>(result);
+            return fl;
         }
     }
 }

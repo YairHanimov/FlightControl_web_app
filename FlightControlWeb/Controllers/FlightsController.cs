@@ -22,8 +22,12 @@ namespace FlightControlWeb.Controllers
         public async Task<IEnumerable<Flight>> GetFlightsAsync([FromQuery(Name = "relative_to")]string relativeTime)
         {
                  List<Flight> listtosend = new List<Flight>();
-
-           // DateTime mytime = DateTime.Parse(relativeTime);
+            DateTime testme;
+            if (!DateTime.TryParse(relativeTime, out testme))
+            {
+                return null;
+            }
+            // DateTime mytime = DateTime.Parse(relativeTime);
             foreach (var mydata in flightplanmanager.flights)
             {
                 DateTime damytime = mydata.initial_location.date_time;
@@ -32,11 +36,11 @@ namespace FlightControlWeb.Controllers
                 int size = mydata.segments.Count;
                 DateTime firstcompare = mydata.initial_location.date_time;
                 InitialLocation firstloack = mydata.initial_location;
-                for (int i=0; i< size; i++)
+                for (int i = 0; i < size; i++)
                 {
-                    damytime= damytime.AddSeconds(mydata.segments[i].timespan_seconds);
+                    damytime = damytime.AddSeconds(mydata.segments[i].timespan_seconds);
                     DateTime d2 = damytime;
-                     DateTime targetDt__ = DateTime.Parse(relativeTime);
+                    DateTime targetDt__ = DateTime.Parse(relativeTime);
                     DateTime targetDt = TimeZoneInfo.ConvertTimeToUtc(targetDt__);
 
                     if (targetDt.Ticks > firstcompare.Ticks && targetDt.Ticks < d2.Ticks)
@@ -50,7 +54,7 @@ namespace FlightControlWeb.Controllers
                         double transitiontime = timespan.TotalSeconds;
                         double allway = allwaysegment.TotalSeconds;
                         double calulate = transitiontime / allway;
-                        double newlat =firstloack.latitude+( (mydata.segments[i].latitude - firstloack.latitude) * calulate);
+                        double newlat = firstloack.latitude + ((mydata.segments[i].latitude - firstloack.latitude) * calulate);
                         double newlong = firstloack.longitude + ((mydata.segments[i].longitude - firstloack.longitude) * calulate);
                         dammy.longitude = newlong;
                         dammy.latitude = newlat;
@@ -63,7 +67,7 @@ namespace FlightControlWeb.Controllers
 
                     // addtolist 
                     firstloack.latitude = mydata.segments[i].latitude;
-                    firstloack.latitude = mydata.segments[i].longitude;
+                    firstloack.longitude = mydata.segments[i].longitude;
 
                 }
 

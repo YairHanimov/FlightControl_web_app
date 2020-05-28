@@ -64,6 +64,7 @@ namespace FlightControlWeb.Controllers.models
             Flightplan p = flights.Where(x => x.FlightPlanId == id).FirstOrDefault();
             if (p == null)
             {
+                return null;
                 throw new Exception("id not found ");
             }
             else

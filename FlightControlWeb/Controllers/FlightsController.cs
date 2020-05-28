@@ -45,6 +45,12 @@ namespace FlightControlWeb.Controllers
 
                     if (targetDt.Ticks > firstcompare.Ticks && targetDt.Ticks < d2.Ticks)
                     {
+                        if(i > 0)
+                        {
+                            firstloack.latitude = mydata.segments[i-1].latitude;
+                            firstloack.longitude = mydata.segments[i-1].longitude;
+                        }
+                        
                         Flight dammy = new Flight();
                         dammy.flight_id = mydata.FlightPlanId;
                         dammy.company_name = mydata.company_name;
@@ -66,8 +72,8 @@ namespace FlightControlWeb.Controllers
                     firstcompare = damytime;
 
                     // addtolist 
-                    firstloack.latitude = mydata.segments[i].latitude;
-                    firstloack.longitude = mydata.segments[i].longitude;
+                  //  firstloack.latitude = mydata.segments[i].latitude;
+                  //  firstloack.longitude = mydata.segments[i].longitude;
 
                 }
 

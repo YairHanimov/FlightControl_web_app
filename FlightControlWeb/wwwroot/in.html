@@ -1,18 +1,23 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
         #map {
-            width: 550px;
+            width: 650px;
             height: 450px;
             position: absolute;
             top: 0;
             bottom: 0;
             left: 0;
             right: 0;
+            border: 3px solid grey;
         }
 
         .one {
@@ -23,6 +28,9 @@
         }
 
         .two {
+            border: 3px solid grey;
+            height: 250px;
+            overflow: scroll;
             grid-column: 4;
             grid-row: 1;
         }
@@ -30,21 +38,32 @@
         .three {
             width: 350px;
             grid-column: 2;
-            grid-row: 5;
+            grid-row: 4;
         }
 
         .four {
             grid-column: 3;
             grid-row: 1;
         }
+
+        .five {
+            grid-column: 4;
+            grid-row: 3;
+            border: 1px solid grey;
+        }
     </style>
     <script>
         let flightArr = new Array();
-
-
+        let pngArr = new Array();
+        let j = 0;
         function Remove(button) {
+            if (button.parentNode.parentNode.style.color == "blue") {
+                button.parentNode.parentNode.style.color = "black";
+                lineGroup.clearLayers();
+                 document.getElementById("three").innerHTML = "";
 
-            var url = "http://localhost:62243/api/Flights/";
+            }
+            var url = "/api/Flights/";
             var xhr = new XMLHttpRequest()
             var dammy = flightArr[button.parentNode.parentNode.rowIndex - 1].flight_id;
             xhr.open("DELETE", url + dammy, true);
@@ -56,26 +75,25 @@
                     console.error(users);
                 }
             }
+
             flightArr.splice(button.parentNode.parentNode.rowIndex - 1, 1);
             xhr.send(null);
-
+            markerGroup2.removeLayer(pngArr[button.parentNode.parentNode.rowIndex - 1]);
+            //pngArr.splice(button.parentNode.parentNode.rowIndex - 1, 1);
             document.getElementById("tblCustomers").deleteRow(button.parentNode.parentNode.rowIndex);
+
         };
         function AddRow(flight) {
             var tBody = document.getElementById("tblCustomers").getElementsByTagName("TBODY")[0];
-
             //Add Row.
-            row = tBody.insertRow(-1);
-
-            //Add Name cell.
+            var row = tBody.insertRow(-1);
+            //Add id cell.
             var cell = row.insertCell(-1);
             cell.innerHTML = flight.flight_id;
-            row.onclick = function () { showFlight(this, flight) };
-
-            //Add Country cell.
+            cell.onclick = function () { showFlight(row, flight) };
+            //Add Company cell.
             cell = row.insertCell(-1);
             cell.innerHTML = flight.company_name;
-
             //Add Button cell.
             cell = row.insertCell(-1);
             var btnRemove = document.createElement("INPUT");
@@ -83,20 +101,15 @@
             btnRemove.value = "X";
             btnRemove.setAttribute("onclick", "Remove(this);");
             cell.appendChild(btnRemove);
-
-
-
-
         }
-
         function showFlight(row, flight) {
+            lineGroup.clearLayers();
             if (row.style.color == "blue") {
                 row.style.color = "black";
                 document.getElementById("three").innerHTML = "";
-
             } else {
-                var url = "http://localhost:62243/api/Flightplan/";
-                var xhr = new XMLHttpRequest()
+                var url = "/api/Flightplan/";
+                var xhr = new XMLHttpRequest();
                 var dammy = flight.flight_id;
                 xhr.open("GET", url + dammy, true);
                 xhr.onload = function () {
@@ -105,7 +118,6 @@
                         var obj = JSON.parse(this.responseText);
                         document.getElementById("three").innerHTML = "passengers: " + obj.passenger +
                             " company name: " + obj.company_name;
-
                         showLine(obj.initial_location, obj.segments[0]);
                         for (var i = 1; i < obj.segments.length; i++) {
                             showLine(obj.segments[i - 1], obj.segments[i]);
@@ -123,42 +135,122 @@
             }
         }
         function showLine(startPoint, endPoint) {
-            let line = L.polyline(
+            L.polyline(
                 [[startPoint.latitude, startPoint.longitude], [endPoint.latitude, endPoint.longitude]],
-                { color: "white", weight: 5, id: 'cxc' }
-            ).addTo(markerGroup);
-            var x_id = L.stamp(line);
-            //document.write(x_id);
+                { color: "white", weight: 5 }
+            ).addTo(lineGroup);
         }
-        function deleteLine(i) {
-            markerGroup.removeLayer(46);
+        function moveMarkers() {
+            let t = 0;
+            markerGroup2.eachLayer(function (marker) {
+                marker.setLatLng([flightArr[t].latitude, flightArr[t].longitude]);
+                t++;
+            });
+
+        }
+        function loadDoc() {
+            var token;
+            var xhttp = new XMLHttpRequest();
+            var now = new Date();
+            var isoDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
+            xhttp.open("GET", "/api/Flights?relative_to=" + isoDate, true);
+            xhttp.send();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    token = this.responseText.replace("[", "").replace("]", "");
+                    token = token.split("},");
+                    for (var i = 0; token[i] != null; i++) {
+                        if (token[i].slice(-1) != "}") {
+                            token[i] = token[i].concat("}");
+                        }
+                        var obj = JSON.parse(token[i]);
+                        if (flightArr.some(e => e.flight_id === obj.flight_id)) {
+
+                            var index = flightArr.map(function (e) {
+                                return e.flight_id;
+                            }).indexOf(obj.flight_id);
+                            flightArr[index] = obj;
+
+
+                        } else {
+                            flightArr.push(obj);
+                            AddRow(obj);
+                            pngArr.push(L.marker([obj.latitude, obj.longitude],
+                                { icon: flightIcon }).addTo(markerGroup2));
+                            pngArr[pngArr.length-1].on('click', function () {
+                                var index2 = flightArr.map(function (e) {return e.flight_id;
+                                }).indexOf(obj.flight_id);
+                                showFlight(document.getElementById("tblCustomers").rows[index2+1], obj);
+                            });
+
+                        }
+                        moveMarkers();
+                    }
+                }
+            };
+        }
+        function loadFile() {
+            var input, file, fr;
+            if (typeof window.FileReader !== 'function') {
+                alert("The file API isn't supported on this browser yet.");
+                return;
+            }
+            input = document.getElementById('fileinput');
+            if (!input) {
+                alert("Um, couldn't find the fileinput element.");
+            }
+            else if (!input.files) {
+                alert("This browser doesn't seem to support the `files` property of file inputs.");
+            }
+            else if (!input.files[0]) {
+                alert("Please select a file before clicking 'Load'");
+            }
+            else {
+
+                file = input.files[0];
+                fr = new FileReader();
+                fr.onload = receivedText;
+                fr.readAsText(file);
+
+            }
+
+            function receivedText(e) {
+                let lines = e.target.result;
+                var newArr = JSON.parse(lines);
+                var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+                var theUrl = "/api/flightplan";
+                xmlhttp.open("POST", theUrl);
+                xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                console.log(JSON.stringify(newArr));
+                xmlhttp.send(JSON.stringify(newArr));
+
+            }
+
         }
     </script>
 </head>
 <body>
-
     <script>
         setInterval(function () {
-
             loadDoc();
         }, 1000);
     </script>
     <div class="one">
-
         <div class="two">
-            <table id="tblCustomers" cellpadding="0" cellspacing="0" border="1">
-                <thead>
+            <table class="table table-striped table-hover " id="tblCustomers">
+                <thead class="thead-dark">
                     <tr>
-                        <th>id</th>
+                        <th>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </th>
                         <th>company</th>
-                        <th></th>
+                        <th>----</th>
                     </tr>
                 </thead>
                 <tbody>
                 </tbody>
-
             </table>
-
         </div>
         <div class="three" id="three">
 
@@ -173,92 +265,20 @@
                 </fieldset>
             </form>
 
-            <script type="text/javascript">
+        </div>
+        <div class="five">
+            <table class="table table-striped" border="1">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>company</th>
+                        <th>----</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
 
-                function loadFile() {
-                    var input, file, fr;
-
-                    if (typeof window.FileReader !== 'function') {
-                        alert("The file API isn't supported on this browser yet.");
-                        return;
-                    }
-
-                    input = document.getElementById('fileinput');
-                    if (!input) {
-                        alert("Um, couldn't find the fileinput element.");
-                    }
-                    else if (!input.files) {
-                        alert("This browser doesn't seem to support the `files` property of file inputs.");
-                    }
-                    else if (!input.files[0]) {
-                        alert("Please select a file before clicking 'Load'");
-                    }
-                    else {
-
-                        file = input.files[0];
-                        fr = new FileReader();
-                        fr.onload = receivedText;
-                        fr.readAsText(file);
-
-                    }
-
-
-                    function receivedText(e) {
-                        let lines = e.target.result;
-                        var newArr = JSON.parse(lines);
-                        var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
-                        var theUrl = "http://localhost:62243/api/flightplan";
-                        xmlhttp.open("POST", theUrl);
-                        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                        console.log(JSON.stringify(newArr));
-                        xmlhttp.send(JSON.stringify(newArr));
-
-
-                    }
-
-                }
-                function loadDoc() {
-                    var token;
-                    var xhttp = new XMLHttpRequest();
-                    var now = new Date();
-                    var isoDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
-                    xhttp.open("GET", "/api/Flights?relative_to=" + isoDate, true);
-                    xhttp.send();
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            token = this.responseText.replace("[", "").replace("]", "");
-                            token = token.split("},");
-                            for (var i = 0; token[i] != null; i++) {
-                                if (token[i].slice(-1) != "}") {
-                                    token[i] = token[i].concat("}");
-                                }
-                                var obj = JSON.parse(token[i]);
-                                if (flightArr.some(e => e.flight_id === obj.flight_id)) {
-                                    var index = flightArr.map(function (e) { return e.flight_id; }).indexOf(obj.flight_id);
-                                    flightArr[index] = obj;
-                                    let png = L.marker([flightArr[index].latitude, flightArr[index].longitude]).addTo(map);
-                                    png.on('click', function () {
-                                        showFlight(row, flightArr[index]);
-                                    });
-                                    //setTimeout(5000);
-                                    //map.removeLayer(png);
-                                    //document.getElementById("three").innerHTML = obj.longitude;
-                                } else {
-                                    flightArr.push(obj);
-                                    AddRow(obj);
-
-                                }
-
-
-                            }
-
-                        }
-                    };
-
-                    //gogo();
-                }
-            </script>
-
+            </table>
         </div>
         <div id="map">
             <script>
@@ -270,10 +290,23 @@
                             'www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     }
                 ).addTo(map);
-                var markerGroup = L.layerGroup().addTo(map);
+                var lineGroup = L.layerGroup().addTo(map);
+                var markerGroup2 = L.layerGroup().addTo(map);
+                map.on('click', function () {
+                    lineGroup.clearLayers();
+                    document.getElementById("three").innerHTML = "";
+                    for (let i = 0; i < flightArr.length; i++) {
+                        document.getElementById("tblCustomers").rows[i+1].style.color = "black";
+                    }
 
+                });
+                var flightIcon = L.icon({
+                    iconUrl: 'https://image.flaticon.com/icons/svg/45/45896.svg',
 
-
+                    iconSize: [33, 33],
+                    iconAnchor: [18, 18],
+                    popupAnchor: [5, 5]
+                });
             </script>
         </div>
 

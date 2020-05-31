@@ -10,7 +10,7 @@ namespace FlightControlWeb.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class servercontolerController : ControllerBase
+    public class serversController : ControllerBase
     {
        public static iservermanager managaerserver;
         // GET: api/servercontoler

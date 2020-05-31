@@ -65,6 +65,7 @@ namespace FlightControlWeb.Controllers
                         dammy.longitude = newlong;
                         dammy.latitude = newlat;
                         dammy.date_time = targetDt;
+                        dammy.is_external = false;
                         listtosend.Add(dammy);
                     }
 
@@ -82,7 +83,12 @@ namespace FlightControlWeb.Controllers
             {
                 foreach (var serverdata in iservermanager.allserverslist)
                 {
-                    listtosend.AddRange(await askrequset(serverdata, relativeTime));
+                     List <Flight> extrenal = await askrequset(serverdata, relativeTime);
+                    foreach(Flight fla in extrenal)
+                    {
+                        fla.is_external = true;
+                    }
+                    listtosend.AddRange(extrenal);
                 }
             }
             return listtosend;

@@ -38,8 +38,12 @@ namespace FlightControlWeb.Controllers
                     Flightplan flightPlan = new Flightplan();
                     string param = "/api/FlightPlan/";
                     flightPlan = await askserver(serverdata, param + id);
+                    if (flightPlan.company_name != null)
+                    {
+                        return flightPlan;
 
-                    return flightPlan;
+
+                    }
                 }
                 return null; 
             }

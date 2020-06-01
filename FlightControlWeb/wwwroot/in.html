@@ -9,9 +9,10 @@
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
+
         #map {
-            width: 650px;
-            height: 450px;
+            width: 630px;
+            height: 400px;
             position: absolute;
             top: 0;
             bottom: 0;
@@ -23,22 +24,23 @@
         .one {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-gap: 10px;
+            grid-gap: 50px;
             grid-auto-rows: minmax(110px, auto);
+            background-color: powderblue;
         }
 
         .two {
             border: 3px solid grey;
-            height: 250px;
+            height: 350px;
             overflow: scroll;
             grid-column: 4;
             grid-row: 1;
         }
 
-        .three {
-            width: 350px;
-            grid-column: 2;
-            grid-row: 4;
+        #three {
+            width: 450px;
+            grid-column: 1;
+            grid-row: 2;
         }
 
         .four {
@@ -47,22 +49,26 @@
         }
 
         .five {
+            height: 200px;
             grid-column: 4;
-            grid-row: 3;
-            border: 1px solid grey;
+            grid-row: 2;
+            border: 3px solid grey;
         }
     </style>
     <script>
         let flightArr = new Array();
         let pngArr = new Array();
-        let j = 0;
+        let flightArr2 = new Array();
+        let pngArr2 = new Array();
+        //remove flights from local list
         function Remove(button) {
             if (button.parentNode.parentNode.style.color == "blue") {
                 button.parentNode.parentNode.style.color = "black";
                 lineGroup.clearLayers();
-                 document.getElementById("three").innerHTML = "";
+                document.getElementById("three").innerHTML = "";
 
             }
+            let x = button.parentNode.parentNode.rowIndex;
             var url = "/api/Flights/";
             var xhr = new XMLHttpRequest()
             var dammy = flightArr[button.parentNode.parentNode.rowIndex - 1].flight_id;
@@ -75,16 +81,21 @@
                     console.error(users);
                 }
             }
-
-            flightArr.splice(button.parentNode.parentNode.rowIndex - 1, 1);
             xhr.send(null);
-            markerGroup2.removeLayer(pngArr[button.parentNode.parentNode.rowIndex - 1]);
-            //pngArr.splice(button.parentNode.parentNode.rowIndex - 1, 1);
-            document.getElementById("tblCustomers").deleteRow(button.parentNode.parentNode.rowIndex);
+            document.getElementById("tblCustomers").deleteRow(x);
+            flightArr.splice(x - 1, 1);
+            markerGroup.removeLayer(pngArr[x - 1]);
+            pngArr.splice(x - 1, 1);
+
 
         };
+        //adding flights to application
         function AddRow(flight) {
-            var tBody = document.getElementById("tblCustomers").getElementsByTagName("TBODY")[0];
+            if (!flight.is_external) {
+                var tBody = document.getElementById("tblCustomers").getElementsByTagName("TBODY")[0];
+            } else {
+                var tBody = document.getElementById("tblCustomers2").getElementsByTagName("TBODY")[0];
+            }
             //Add Row.
             var row = tBody.insertRow(-1);
             //Add id cell.
@@ -95,19 +106,33 @@
             cell = row.insertCell(-1);
             cell.innerHTML = flight.company_name;
             //Add Button cell.
-            cell = row.insertCell(-1);
-            var btnRemove = document.createElement("INPUT");
-            btnRemove.type = "button";
-            btnRemove.value = "X";
-            btnRemove.setAttribute("onclick", "Remove(this);");
-            cell.appendChild(btnRemove);
+            if (!flight.is_external) {
+                cell = row.insertCell(-1);
+                var btnRemove = document.createElement("INPUT");
+                btnRemove.type = "button";
+                btnRemove.value = "X";
+                btnRemove.setAttribute("onclick", "Remove(this);");
+                cell.appendChild(btnRemove);
+            }
         }
+        //show/unshow flight while pressing on icon/table
         function showFlight(row, flight) {
             lineGroup.clearLayers();
+            for (let i = 0; i < pngArr.length; i++) {
+                pngArr[i].setIcon(flightIcon);
+            }
+            for (let i = 0; i < pngArr2.length; i++) {
+                pngArr2[i].setIcon(flightIcon);
+            }
             if (row.style.color == "blue") {
                 row.style.color = "black";
                 document.getElementById("three").innerHTML = "";
             } else {
+                if (row.parentNode.parentNode.id === "tblCustomers") {
+                    pngArr[row.rowIndex - 1].setIcon(pressedIcon);
+                } else if (row.parentNode.parentNode.id === "tblCustomers2") {
+                    pngArr2[row.rowIndex - 1].setIcon(pressedIcon);
+                }
                 var url = "/api/Flightplan/";
                 var xhr = new XMLHttpRequest();
                 var dammy = flight.flight_id;
@@ -122,7 +147,6 @@
                         for (var i = 1; i < obj.segments.length; i++) {
                             showLine(obj.segments[i - 1], obj.segments[i]);
                         }
-
                     } else {
                         console.error(users);
                     }
@@ -130,30 +154,44 @@
                 xhr.send(null);
                 for (let i = 1; i <= flightArr.length; i++) {
                     document.getElementById("tblCustomers").rows[i].style.color = "black";
+                } for (let i = 1; i <= flightArr2.length; i++) {
+                    document.getElementById("tblCustomers2").rows[i].style.color = "black";
                 }
                 row.style.color = "blue";
+
             }
         }
+        //showing line of pressed flight
         function showLine(startPoint, endPoint) {
             L.polyline(
                 [[startPoint.latitude, startPoint.longitude], [endPoint.latitude, endPoint.longitude]],
                 { color: "white", weight: 5 }
             ).addTo(lineGroup);
         }
+        //setting posing of local flights
         function moveMarkers() {
             let t = 0;
-            markerGroup2.eachLayer(function (marker) {
+            markerGroup.eachLayer(function (marker) {
                 marker.setLatLng([flightArr[t].latitude, flightArr[t].longitude]);
+                t++;
+            });
+        }
+        //setting posion of out-source flights
+        function moveMarkers2() {
+            let t = 0;
+            markerGroup2.eachLayer(function (marker) {
+                marker.setLatLng([flightArr2[t].latitude, flightArr2[t].longitude]);
                 t++;
             });
 
         }
+        //send requst to server and reciving flights details from server
         function loadDoc() {
             var token;
             var xhttp = new XMLHttpRequest();
             var now = new Date();
             var isoDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString();
-            var opentosend = "/api/Flights?relative_to=" +isoDate+"&sync_all"
+            var opentosend = "/api/Flights?relative_to=" + isoDate + "&sync_all"
             xhttp.open("GET", opentosend, true);
             xhttp.send();
             xhttp.onreadystatechange = function () {
@@ -165,31 +203,54 @@
                             token[i] = token[i].concat("}");
                         }
                         var obj = JSON.parse(token[i]);
-                        if (flightArr.some(e => e.flight_id === obj.flight_id)) {
+                        if (!obj.is_external) {
+                            if (flightArr.some(e => e.flight_id === obj.flight_id)) {
 
-                            var index = flightArr.map(function (e) {
-                                return e.flight_id;
-                            }).indexOf(obj.flight_id);
-                            flightArr[index] = obj;
-
-
-                        } else {
-                            flightArr.push(obj);
-                            AddRow(obj);
-                            pngArr.push(L.marker([obj.latitude, obj.longitude],
-                                { icon: flightIcon }).addTo(markerGroup2));
-                            pngArr[pngArr.length-1].on('click', function () {
-                                var index2 = flightArr.map(function (e) {return e.flight_id;
+                                var index = flightArr.map(function (e) {
+                                    return e.flight_id;
                                 }).indexOf(obj.flight_id);
-                                showFlight(document.getElementById("tblCustomers").rows[index2+1], obj);
-                            });
+                                flightArr[index] = obj;
+                            } else {
+                                flightArr.push(obj);
+                                AddRow(obj);
+                                pngArr.push(L.marker([obj.latitude, obj.longitude],
+                                    { icon: flightIcon }).addTo(markerGroup));
+                                pngArr[pngArr.length - 1].on('click', function () {
+                                    var index2 = flightArr.map(function (e) {
+                                        return e.flight_id;
+                                    }).indexOf(obj.flight_id);
+                                    showFlight(document.getElementById("tblCustomers").rows[index2 + 1], obj);
+
+                                });
+                            }
+
+                        } else if (obj.is_external) {
+                            if (flightArr2.some(e => e.flight_id === obj.flight_id)) {
+
+                                var index = flightArr2.map(function (e) {
+                                    return e.flight_id;
+                                }).indexOf(obj.flight_id);
+                                flightArr2[index] = obj;
+                            } else {
+                                flightArr2.push(obj);
+                                AddRow(obj);
+                                pngArr2.push(L.marker([obj.latitude, obj.longitude],
+                                    { icon: flightIcon }).addTo(markerGroup2));
+                                pngArr2[pngArr2.length - 1].on('click', function () {
+                                    var index2 = flightArr2.map(function (e) {
+                                        return e.flight_id;
+                                    }).indexOf(obj.flight_id);
+                                    showFlight(document.getElementById("tblCustomers2").rows[index2 + 1], obj);
+                                });
+
+                            }
 
                         }
-                        moveMarkers();
                     }
                 }
             };
         }
+        //upload flight from json file to server
         function loadFile() {
             var input, file, fr;
             if (typeof window.FileReader !== 'function') {
@@ -228,13 +289,17 @@
             }
 
         }
+
     </script>
 </head>
 <body>
     <script>
         setInterval(function () {
             loadDoc();
+            moveMarkers();
+            moveMarkers2();
         }, 1000);
+
     </script>
     <div class="one">
         <div class="two">
@@ -253,7 +318,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="three" id="three">
+        <div class="lead blockquote text-center text-muted text-uppercase" id="three">
 
         </div>
         <div class="four">
@@ -268,12 +333,11 @@
 
         </div>
         <div class="five">
-            <table class="table table-striped" border="1">
+            <table class="table table-striped" border="1" id="tblCustomers2">
                 <thead>
                     <tr>
                         <th>id</th>
                         <th>company</th>
-                        <th>----</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -292,18 +356,32 @@
                     }
                 ).addTo(map);
                 var lineGroup = L.layerGroup().addTo(map);
+                var markerGroup = L.layerGroup().addTo(map);
                 var markerGroup2 = L.layerGroup().addTo(map);
                 map.on('click', function () {
                     lineGroup.clearLayers();
                     document.getElementById("three").innerHTML = "";
                     for (let i = 0; i < flightArr.length; i++) {
-                        document.getElementById("tblCustomers").rows[i+1].style.color = "black";
+                        document.getElementById("tblCustomers").rows[i + 1].style.color = "black";
                     }
-
+                    for (let i = 0; i < flightArr2.length; i++) {
+                        document.getElementById("tblCustomers2").rows[i + 1].style.color = "black";
+                    }
+                    for (let i = 0; i < pngArr.length; i++) {
+                        pngArr[i].setIcon(flightIcon);
+                    }
+                    for (let i = 0; i < pngArr2.length; i++) {
+                        pngArr2[i].setIcon(flightIcon);
+                    }
                 });
-                var flightIcon = L.icon({
+                let flightIcon = L.icon({
                     iconUrl: 'https://image.flaticon.com/icons/svg/45/45896.svg',
-
+                    iconSize: [33, 33],
+                    iconAnchor: [18, 18],
+                    popupAnchor: [5, 5]
+                });
+                let pressedIcon = L.icon({
+                    iconUrl: 'https://image.flaticon.com/icons/svg/2937/2937003.svg',
                     iconSize: [33, 33],
                     iconAnchor: [18, 18],
                     popupAnchor: [5, 5]

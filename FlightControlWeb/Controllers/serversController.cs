@@ -12,7 +12,7 @@ namespace FlightControlWeb.Controllers
     [ApiController]
     public class serversController : ControllerBase
     {
-       public static iservermanager managaerserver;
+       public static iservermanager managaerserver = new iservermanager();
         // GET: api/servercontoler
         [HttpGet]
         public IEnumerable<server> Get()

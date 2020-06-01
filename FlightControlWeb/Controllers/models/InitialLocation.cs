@@ -12,5 +12,12 @@ namespace FlightControlWeb.Controllers.models
         public double latitude { get; set; }
 
         public DateTime date_time { get; set; }
+        public void setalll(double lo, double la, DateTime t)
+        {
+            this.longitude = lo;
+            this.latitude = la;
+            this.date_time = t;
+        }
     }
+   
 }

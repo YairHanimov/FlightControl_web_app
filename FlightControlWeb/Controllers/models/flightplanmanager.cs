@@ -28,8 +28,7 @@ namespace FlightControlWeb.Controllers.models
         public static List<Flightplan> flights = new List<Flightplan>()
 
         {
-            new Flightplan  {   initial_location=InitialLocation.First(), passenger =2,
-              company_name="bla bla",segments=listasegments, FlightPlanId="aaac12"},
+          
          
         };
 

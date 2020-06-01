@@ -79,6 +79,7 @@ namespace FlightControlWeb.Controllers
                 }
 
             }
+
             if (Request.Query.ContainsKey("sync_all"))
             {
                 foreach (var serverdata in iservermanager.allserverslist)

@@ -13,27 +13,25 @@
         #map {
             width: 630px;
             height: 400px;
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            grid-column: 1;
+            grid-row: 1;
             border: 3px solid grey;
         }
 
         .one {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-gap: 50px;
+            position: absolute;
             grid-auto-rows: minmax(110px, auto);
             background-color: powderblue;
         }
 
         .two {
+            width: 350px;
             border: 3px solid grey;
             height: 350px;
             overflow: scroll;
-            grid-column: 4;
+            grid-column: 3;
             grid-row: 1;
         }
 
@@ -44,13 +42,13 @@
         }
 
         .four {
-            grid-column: 3;
+            grid-column: 2;
             grid-row: 1;
         }
 
         .five {
             height: 200px;
-            grid-column: 4;
+            grid-column: 3;
             grid-row: 2;
             border: 3px solid grey;
         }
@@ -325,7 +323,7 @@
             <form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
 
                 <fieldset>
-                    <h2>Json File</h2>
+                    <h2>&nbsp;Json File</h2>
                     <input type='file' id='fileinput'>
                     <input type='button' id='btnLoad' value='Load' onclick='loadFile();'>
                 </fieldset>

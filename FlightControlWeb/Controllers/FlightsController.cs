@@ -41,8 +41,7 @@ namespace FlightControlWeb.Controllers
                     damytime = damytime.AddSeconds(mydata.segments[i].timespan_seconds);
                     DateTime d2 = damytime;
                     DateTime targetDt__ = DateTime.Parse(relativeTime);
-                    DateTime targetDt = TimeZoneInfo.ConvertTimeToUtc(targetDt__);
-
+                     DateTime targetDt = TimeZoneInfo.ConvertTimeToUtc(targetDt__);
                     if (targetDt.Ticks > firstcompare.Ticks && targetDt.Ticks < d2.Ticks)
                     {
                         if(i > 0)
